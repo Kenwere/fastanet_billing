@@ -3,20 +3,38 @@ info:
   # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: FASTANET ISP Billing & Hotspot Management System API
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: organizations
+    description: ISP organization management
+  - name: packages
+    description: Internet packages management
+  - name: routers
+    description: MikroTik router management
+  - name: users
+    description: ISP client users management
+  - name: vouchers
+    description: Voucher system
+  - name: pppoe
+    description: PPPoE accounts management
+  - name: payments
+    description: Payment tracking
+  - name: sessions
+    description: Active sessions
+  - name: dashboard
+    description: Dashboard analytics
+
 paths:
   /healthz:
     get:
       operationId: healthCheck
       tags: [health]
       summary: Health check
-      description: Returns server health status
       responses:
         "200":
           description: Healthy
@@ -24,6 +42,797 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  # Organizations
+  /organizations:
+    get:
+      operationId: listOrganizations
+      tags: [organizations]
+      summary: List all ISP organizations
+      responses:
+        "200":
+          description: List of organizations
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Organization"
+    post:
+      operationId: createOrganization
+      tags: [organizations]
+      summary: Create a new ISP organization
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateOrganizationBody"
+      responses:
+        "201":
+          description: Organization created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Organization"
+
+  /organizations/{id}:
+    get:
+      operationId: getOrganization
+      tags: [organizations]
+      summary: Get organization by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Organization
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Organization"
+        "404":
+          description: Not found
+    patch:
+      operationId: updateOrganization
+      tags: [organizations]
+      summary: Update an organization
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateOrganizationBody"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Organization"
+    delete:
+      operationId: deleteOrganization
+      tags: [organizations]
+      summary: Delete an organization
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  # Packages
+  /packages:
+    get:
+      operationId: listPackages
+      tags: [packages]
+      summary: List all internet packages
+      parameters:
+        - name: orgId
+          in: query
+          required: false
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: List of packages
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Package"
+    post:
+      operationId: createPackage
+      tags: [packages]
+      summary: Create a new package
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreatePackageBody"
+      responses:
+        "201":
+          description: Package created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Package"
+
+  /packages/{id}:
+    get:
+      operationId: getPackage
+      tags: [packages]
+      summary: Get package by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Package
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Package"
+    patch:
+      operationId: updatePackage
+      tags: [packages]
+      summary: Update a package
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdatePackageBody"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Package"
+    delete:
+      operationId: deletePackage
+      tags: [packages]
+      summary: Delete a package
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  # Routers
+  /routers:
+    get:
+      operationId: listRouters
+      tags: [routers]
+      summary: List all MikroTik routers
+      parameters:
+        - name: orgId
+          in: query
+          required: false
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: List of routers
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Router"
+    post:
+      operationId: createRouter
+      tags: [routers]
+      summary: Add a MikroTik router
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateRouterBody"
+      responses:
+        "201":
+          description: Router added
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Router"
+
+  /routers/{id}:
+    get:
+      operationId: getRouter
+      tags: [routers]
+      summary: Get router by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Router
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Router"
+    patch:
+      operationId: updateRouter
+      tags: [routers]
+      summary: Update a router
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateRouterBody"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Router"
+    delete:
+      operationId: deleteRouter
+      tags: [routers]
+      summary: Delete a router
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  /routers/{id}/rsc:
+    get:
+      operationId: getRouterRsc
+      tags: [routers]
+      summary: Download MikroTik .rsc configuration script for this router
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: RSC script content
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RouterRscResponse"
+
+  /routers/{id}/status:
+    get:
+      operationId: getRouterStatus
+      tags: [routers]
+      summary: Get router connection status and stats
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Router status
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RouterStatus"
+
+  # ISP Users
+  /isp-users:
+    get:
+      operationId: listIspUsers
+      tags: [users]
+      summary: List ISP client users
+      parameters:
+        - name: orgId
+          in: query
+          required: false
+          schema:
+            type: integer
+        - name: status
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [active, expired, suspended]
+      responses:
+        "200":
+          description: List of ISP users
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/IspUser"
+    post:
+      operationId: createIspUser
+      tags: [users]
+      summary: Create a new ISP user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateIspUserBody"
+      responses:
+        "201":
+          description: User created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/IspUser"
+
+  /isp-users/{id}:
+    get:
+      operationId: getIspUser
+      tags: [users]
+      summary: Get ISP user by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: ISP User
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/IspUser"
+    patch:
+      operationId: updateIspUser
+      tags: [users]
+      summary: Update an ISP user
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateIspUserBody"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/IspUser"
+    delete:
+      operationId: deleteIspUser
+      tags: [users]
+      summary: Delete an ISP user
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  # Vouchers
+  /vouchers:
+    get:
+      operationId: listVouchers
+      tags: [vouchers]
+      summary: List vouchers
+      parameters:
+        - name: orgId
+          in: query
+          required: false
+          schema:
+            type: integer
+        - name: status
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [unused, used, expired]
+      responses:
+        "200":
+          description: List of vouchers
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Voucher"
+    post:
+      operationId: generateVouchers
+      tags: [vouchers]
+      summary: Generate bulk vouchers
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GenerateVouchersBody"
+      responses:
+        "201":
+          description: Vouchers generated
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Voucher"
+
+  /vouchers/{id}:
+    get:
+      operationId: getVoucher
+      tags: [vouchers]
+      summary: Get voucher by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Voucher
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Voucher"
+    delete:
+      operationId: deleteVoucher
+      tags: [vouchers]
+      summary: Delete a voucher
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  # PPPoE Accounts
+  /pppoe-accounts:
+    get:
+      operationId: listPppoeAccounts
+      tags: [pppoe]
+      summary: List PPPoE accounts
+      parameters:
+        - name: orgId
+          in: query
+          required: false
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: List of PPPoE accounts
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/PppoeAccount"
+    post:
+      operationId: createPppoeAccount
+      tags: [pppoe]
+      summary: Create a PPPoE account
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreatePppoeAccountBody"
+      responses:
+        "201":
+          description: Account created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PppoeAccount"
+
+  /pppoe-accounts/{id}:
+    get:
+      operationId: getPppoeAccount
+      tags: [pppoe]
+      summary: Get PPPoE account by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: PPPoE Account
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PppoeAccount"
+    patch:
+      operationId: updatePppoeAccount
+      tags: [pppoe]
+      summary: Update a PPPoE account
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdatePppoeAccountBody"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PppoeAccount"
+    delete:
+      operationId: deletePppoeAccount
+      tags: [pppoe]
+      summary: Delete a PPPoE account
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  # Payments
+  /payments:
+    get:
+      operationId: listPayments
+      tags: [payments]
+      summary: List payments
+      parameters:
+        - name: orgId
+          in: query
+          required: false
+          schema:
+            type: integer
+        - name: status
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [pending, paid, failed]
+      responses:
+        "200":
+          description: List of payments
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Payment"
+    post:
+      operationId: createPayment
+      tags: [payments]
+      summary: Create a payment record
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreatePaymentBody"
+      responses:
+        "201":
+          description: Payment created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Payment"
+
+  /payments/{id}:
+    get:
+      operationId: getPayment
+      tags: [payments]
+      summary: Get payment by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Payment
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Payment"
+    patch:
+      operationId: updatePayment
+      tags: [payments]
+      summary: Update payment status
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdatePaymentBody"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Payment"
+
+  # Sessions
+  /sessions:
+    get:
+      operationId: listSessions
+      tags: [sessions]
+      summary: List active sessions
+      parameters:
+        - name: orgId
+          in: query
+          required: false
+          schema:
+            type: integer
+        - name: active
+          in: query
+          required: false
+          schema:
+            type: boolean
+      responses:
+        "200":
+          description: List of sessions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Session"
+
+  /sessions/{id}/disconnect:
+    post:
+      operationId: disconnectSession
+      tags: [sessions]
+      summary: Disconnect an active session
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Session disconnected
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Session"
+
+  # Dashboard
+  /dashboard/stats:
+    get:
+      operationId: getDashboardStats
+      tags: [dashboard]
+      summary: Get overall dashboard statistics
+      parameters:
+        - name: orgId
+          in: query
+          required: false
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Dashboard stats
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DashboardStats"
+
+  /dashboard/revenue:
+    get:
+      operationId: getRevenueChart
+      tags: [dashboard]
+      summary: Get revenue chart data by period
+      parameters:
+        - name: orgId
+          in: query
+          required: false
+          schema:
+            type: integer
+        - name: period
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [daily, weekly, monthly]
+      responses:
+        "200":
+          description: Revenue chart data
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/RevenueDataPoint"
+
+  /dashboard/router-health:
+    get:
+      operationId: getRouterHealth
+      tags: [dashboard]
+      summary: Get router health and uptime statistics
+      parameters:
+        - name: orgId
+          in: query
+          required: false
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Router health data
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/RouterHealthSummary"
+
 components:
   schemas:
     HealthStatus:
@@ -34,3 +843,758 @@ components:
       required:
         - status
 
+    Organization:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        subdomain:
+          type: string
+        ownerName:
+          type: string
+        ownerEmail:
+          type: string
+        phone:
+          type: ["string", "null"]
+        paymentMethods:
+          type: string
+        logoUrl:
+          type: ["string", "null"]
+        primaryColor:
+          type: string
+        welcomeMessage:
+          type: ["string", "null"]
+        loginStyle:
+          type: string
+          enum: [voucher, phone, pppoe]
+        isActive:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - name
+        - subdomain
+        - ownerName
+        - ownerEmail
+        - paymentMethods
+        - primaryColor
+        - loginStyle
+        - isActive
+        - createdAt
+
+    CreateOrganizationBody:
+      type: object
+      properties:
+        name:
+          type: string
+        subdomain:
+          type: string
+        ownerName:
+          type: string
+        ownerEmail:
+          type: string
+        phone:
+          type: ["string", "null"]
+        paymentMethods:
+          type: string
+        logoUrl:
+          type: ["string", "null"]
+        primaryColor:
+          type: string
+        welcomeMessage:
+          type: ["string", "null"]
+        loginStyle:
+          type: string
+          enum: [voucher, phone, pppoe]
+      required:
+        - name
+        - subdomain
+        - ownerName
+        - ownerEmail
+
+    UpdateOrganizationBody:
+      type: object
+      properties:
+        name:
+          type: string
+        phone:
+          type: ["string", "null"]
+        paymentMethods:
+          type: string
+        logoUrl:
+          type: ["string", "null"]
+        primaryColor:
+          type: string
+        welcomeMessage:
+          type: ["string", "null"]
+        loginStyle:
+          type: string
+          enum: [voucher, phone, pppoe]
+        isActive:
+          type: boolean
+
+    Package:
+      type: object
+      properties:
+        id:
+          type: integer
+        orgId:
+          type: integer
+        name:
+          type: string
+        price:
+          type: number
+        durationValue:
+          type: integer
+        durationUnit:
+          type: string
+          enum: [minutes, hours, days]
+        downloadSpeed:
+          type: string
+        uploadSpeed:
+          type: string
+        dataLimit:
+          type: ["string", "null"]
+        type:
+          type: string
+          enum: [hotspot, pppoe]
+        isActive:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - orgId
+        - name
+        - price
+        - durationValue
+        - durationUnit
+        - downloadSpeed
+        - uploadSpeed
+        - type
+        - isActive
+        - createdAt
+
+    CreatePackageBody:
+      type: object
+      properties:
+        orgId:
+          type: integer
+        name:
+          type: string
+        price:
+          type: number
+        durationValue:
+          type: integer
+        durationUnit:
+          type: string
+          enum: [minutes, hours, days]
+        downloadSpeed:
+          type: string
+        uploadSpeed:
+          type: string
+        dataLimit:
+          type: ["string", "null"]
+        type:
+          type: string
+          enum: [hotspot, pppoe]
+      required:
+        - orgId
+        - name
+        - price
+        - durationValue
+        - durationUnit
+        - downloadSpeed
+        - uploadSpeed
+        - type
+
+    UpdatePackageBody:
+      type: object
+      properties:
+        name:
+          type: string
+        price:
+          type: number
+        durationValue:
+          type: integer
+        durationUnit:
+          type: string
+          enum: [minutes, hours, days]
+        downloadSpeed:
+          type: string
+        uploadSpeed:
+          type: string
+        dataLimit:
+          type: ["string", "null"]
+        isActive:
+          type: boolean
+
+    Router:
+      type: object
+      properties:
+        id:
+          type: integer
+        orgId:
+          type: integer
+        name:
+          type: string
+        ipAddress:
+          type: string
+        apiPort:
+          type: integer
+        username:
+          type: string
+        model:
+          type: ["string", "null"]
+        location:
+          type: ["string", "null"]
+        status:
+          type: string
+          enum: [online, offline, unknown]
+        uptimeSeconds:
+          type: ["integer", "null"]
+        activeUsers:
+          type: ["integer", "null"]
+        type:
+          type: string
+          enum: [hotspot, pppoe, both]
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - orgId
+        - name
+        - ipAddress
+        - apiPort
+        - username
+        - status
+        - type
+        - createdAt
+
+    CreateRouterBody:
+      type: object
+      properties:
+        orgId:
+          type: integer
+        name:
+          type: string
+        ipAddress:
+          type: string
+        apiPort:
+          type: integer
+        username:
+          type: string
+        password:
+          type: string
+        model:
+          type: ["string", "null"]
+        location:
+          type: ["string", "null"]
+        type:
+          type: string
+          enum: [hotspot, pppoe, both]
+      required:
+        - orgId
+        - name
+        - ipAddress
+        - username
+        - password
+
+    UpdateRouterBody:
+      type: object
+      properties:
+        name:
+          type: string
+        ipAddress:
+          type: string
+        apiPort:
+          type: integer
+        username:
+          type: string
+        password:
+          type: string
+        model:
+          type: ["string", "null"]
+        location:
+          type: ["string", "null"]
+        type:
+          type: string
+          enum: [hotspot, pppoe, both]
+        status:
+          type: string
+          enum: [online, offline, unknown]
+
+    RouterRscResponse:
+      type: object
+      properties:
+        routerId:
+          type: integer
+        routerName:
+          type: string
+        script:
+          type: string
+        filename:
+          type: string
+      required:
+        - routerId
+        - routerName
+        - script
+        - filename
+
+    RouterStatus:
+      type: object
+      properties:
+        routerId:
+          type: integer
+        status:
+          type: string
+          enum: [online, offline, unknown]
+        uptimeSeconds:
+          type: ["integer", "null"]
+        activeUsers:
+          type: ["integer", "null"]
+        cpuLoad:
+          type: ["number", "null"]
+        freeMemory:
+          type: ["string", "null"]
+        lastCheckedAt:
+          type: string
+          format: date-time
+      required:
+        - routerId
+        - status
+        - lastCheckedAt
+
+    IspUser:
+      type: object
+      properties:
+        id:
+          type: integer
+        orgId:
+          type: integer
+        routerId:
+          type: ["integer", "null"]
+        packageId:
+          type: ["integer", "null"]
+        fullName:
+          type: string
+        phone:
+          type: ["string", "null"]
+        email:
+          type: ["string", "null"]
+        macAddress:
+          type: ["string", "null"]
+        ipAddress:
+          type: ["string", "null"]
+        username:
+          type: ["string", "null"]
+        status:
+          type: string
+          enum: [active, expired, suspended]
+        expiryDate:
+          type: ["string", "null"]
+          format: date-time
+        packageName:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - orgId
+        - fullName
+        - status
+        - createdAt
+
+    CreateIspUserBody:
+      type: object
+      properties:
+        orgId:
+          type: integer
+        routerId:
+          type: ["integer", "null"]
+        packageId:
+          type: ["integer", "null"]
+        fullName:
+          type: string
+        phone:
+          type: ["string", "null"]
+        email:
+          type: ["string", "null"]
+        macAddress:
+          type: ["string", "null"]
+        ipAddress:
+          type: ["string", "null"]
+        username:
+          type: ["string", "null"]
+        password:
+          type: ["string", "null"]
+      required:
+        - orgId
+        - fullName
+
+    UpdateIspUserBody:
+      type: object
+      properties:
+        routerId:
+          type: ["integer", "null"]
+        packageId:
+          type: ["integer", "null"]
+        fullName:
+          type: string
+        phone:
+          type: ["string", "null"]
+        email:
+          type: ["string", "null"]
+        macAddress:
+          type: ["string", "null"]
+        ipAddress:
+          type: ["string", "null"]
+        status:
+          type: string
+          enum: [active, expired, suspended]
+        expiryDate:
+          type: ["string", "null"]
+          format: date-time
+
+    Voucher:
+      type: object
+      properties:
+        id:
+          type: integer
+        orgId:
+          type: integer
+        packageId:
+          type: integer
+        code:
+          type: string
+        status:
+          type: string
+          enum: [unused, used, expired]
+        usedAt:
+          type: ["string", "null"]
+          format: date-time
+        usedByUserId:
+          type: ["integer", "null"]
+        expiryDate:
+          type: ["string", "null"]
+          format: date-time
+        packageName:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - orgId
+        - packageId
+        - code
+        - status
+        - createdAt
+
+    GenerateVouchersBody:
+      type: object
+      properties:
+        orgId:
+          type: integer
+        packageId:
+          type: integer
+        count:
+          type: integer
+        expiryDays:
+          type: ["integer", "null"]
+      required:
+        - orgId
+        - packageId
+        - count
+
+    PppoeAccount:
+      type: object
+      properties:
+        id:
+          type: integer
+        orgId:
+          type: integer
+        routerId:
+          type: integer
+        packageId:
+          type: ["integer", "null"]
+        userId:
+          type: ["integer", "null"]
+        username:
+          type: string
+        service:
+          type: string
+        profile:
+          type: ["string", "null"]
+        status:
+          type: string
+          enum: [active, inactive, suspended]
+        expiryDate:
+          type: ["string", "null"]
+          format: date-time
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - orgId
+        - routerId
+        - username
+        - service
+        - status
+        - createdAt
+
+    CreatePppoeAccountBody:
+      type: object
+      properties:
+        orgId:
+          type: integer
+        routerId:
+          type: integer
+        packageId:
+          type: ["integer", "null"]
+        userId:
+          type: ["integer", "null"]
+        username:
+          type: string
+        password:
+          type: string
+        service:
+          type: string
+        profile:
+          type: ["string", "null"]
+      required:
+        - orgId
+        - routerId
+        - username
+        - password
+        - service
+
+    UpdatePppoeAccountBody:
+      type: object
+      properties:
+        packageId:
+          type: ["integer", "null"]
+        password:
+          type: string
+        service:
+          type: string
+        profile:
+          type: ["string", "null"]
+        status:
+          type: string
+          enum: [active, inactive, suspended]
+        expiryDate:
+          type: ["string", "null"]
+          format: date-time
+
+    Payment:
+      type: object
+      properties:
+        id:
+          type: integer
+        orgId:
+          type: integer
+        userId:
+          type: ["integer", "null"]
+        packageId:
+          type: ["integer", "null"]
+        amount:
+          type: number
+        currency:
+          type: string
+        gateway:
+          type: string
+          enum: [mpesa, paystack, pesapal, intasend, manual]
+        transactionRef:
+          type: ["string", "null"]
+        phoneNumber:
+          type: ["string", "null"]
+        status:
+          type: string
+          enum: [pending, paid, failed]
+        userName:
+          type: ["string", "null"]
+        packageName:
+          type: ["string", "null"]
+        paidAt:
+          type: ["string", "null"]
+          format: date-time
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - orgId
+        - amount
+        - currency
+        - gateway
+        - status
+        - createdAt
+
+    CreatePaymentBody:
+      type: object
+      properties:
+        orgId:
+          type: integer
+        userId:
+          type: ["integer", "null"]
+        packageId:
+          type: ["integer", "null"]
+        amount:
+          type: number
+        currency:
+          type: string
+        gateway:
+          type: string
+          enum: [mpesa, paystack, pesapal, intasend, manual]
+        transactionRef:
+          type: ["string", "null"]
+        phoneNumber:
+          type: ["string", "null"]
+      required:
+        - orgId
+        - amount
+        - currency
+        - gateway
+
+    UpdatePaymentBody:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [pending, paid, failed]
+        transactionRef:
+          type: ["string", "null"]
+        paidAt:
+          type: ["string", "null"]
+          format: date-time
+
+    Session:
+      type: object
+      properties:
+        id:
+          type: integer
+        orgId:
+          type: integer
+        userId:
+          type: ["integer", "null"]
+        routerId:
+          type: ["integer", "null"]
+        packageId:
+          type: ["integer", "null"]
+        macAddress:
+          type: ["string", "null"]
+        ipAddress:
+          type: ["string", "null"]
+        type:
+          type: string
+          enum: [hotspot, pppoe]
+        isActive:
+          type: boolean
+        startedAt:
+          type: string
+          format: date-time
+        expiresAt:
+          type: ["string", "null"]
+          format: date-time
+        endedAt:
+          type: ["string", "null"]
+          format: date-time
+        userName:
+          type: ["string", "null"]
+        routerName:
+          type: ["string", "null"]
+        packageName:
+          type: ["string", "null"]
+      required:
+        - id
+        - orgId
+        - type
+        - isActive
+        - startedAt
+
+    DashboardStats:
+      type: object
+      properties:
+        totalUsers:
+          type: integer
+        activeUsers:
+          type: integer
+        expiredUsers:
+          type: integer
+        totalRouters:
+          type: integer
+        onlineRouters:
+          type: integer
+        totalRevenue:
+          type: number
+        monthlyRevenue:
+          type: number
+        pendingPayments:
+          type: integer
+        totalVouchers:
+          type: integer
+        unusedVouchers:
+          type: integer
+        activeSessions:
+          type: integer
+        totalPackages:
+          type: integer
+      required:
+        - totalUsers
+        - activeUsers
+        - expiredUsers
+        - totalRouters
+        - onlineRouters
+        - totalRevenue
+        - monthlyRevenue
+        - pendingPayments
+        - totalVouchers
+        - unusedVouchers
+        - activeSessions
+        - totalPackages
+
+    RevenueDataPoint:
+      type: object
+      properties:
+        label:
+          type: string
+        amount:
+          type: number
+        count:
+          type: integer
+      required:
+        - label
+        - amount
+        - count
+
+    RouterHealthSummary:
+      type: object
+      properties:
+        routerId:
+          type: integer
+        routerName:
+          type: string
+        status:
+          type: string
+          enum: [online, offline, unknown]
+        uptimePercent:
+          type: number
+        activeUsers:
+          type: ["integer", "null"]
+        lastSeen:
+          type: ["string", "null"]
+          format: date-time
+      required:
+        - routerId
+        - routerName
+        - status
+        - uptimePercent

@@ -1,0 +1,546 @@
+PROMPT: FASTANET ISP BILLING SYSTEM (FULL STACK SPEC)
+
+You are an expert full-stack engineer. Build a multi-tenant ISP billing and hotspot management system called FASTANET.
+
+The system allows multiple ISPs to register and manage their own independent billing infrastructure using MikroTik routers, PPPoE, and hotspot authentication with automated billing, payments, and user lifecycle control.
+
+🌐 CORE SYSTEM OVERVIEW
+
+FASTANET is a multi-ISP SaaS platform where each ISP gets:
+
+ A unique custom subdomain login portal
+
+ Isolated data (multi-tenant architecture via org_id)
+
+ Full ISP business management tools
+
+ MikroTik router integration
+
+ Automated billing + disconnection system
+
+Example:
+
+ isp1.fastanet.com
+
+ myisp.fastanet.com
+
+ speedlink.fastanet.com
+
+🎨 UI / DESIGN REQUIREMENTS
+
+ Frontend: HTML + Bootstrap
+
+ Theme:
+
+ Background: White
+
+ Primary accents: Yellow / Gold (#f5c542 or similar)
+
+ Clean SaaS dashboard style
+
+ Responsive design (mobile + desktop)
+
+ Include charts (use Chart.js)
+
+🔐 AUTH & MULTI-TENANT SYSTEM
+
+ Supabase Auth system
+
+ Auto-create ISP organization on signup
+
+ Each user belongs to an org_id
+
+ Role-based access:
+
+ super_admin
+
+ admin
+
+ operator
+
+ support
+
+Each ISP must:
+
+ Only see their own data
+
+ Manage their own routers, users, payments, packages
+
+📡 CORE FEATURES
+
+1. MikroTik Integration
+
+ Add MikroTik routers via API (port 8728)
+
+ Store:
+
+ IP address
+
+ Username/password
+
+ Model
+
+ Connection status
+
+ Show:
+
+ Uptime
+
+ Downtime (daily/weekly/monthly)
+
+ Active users per router
+
+ Support:
+
+ Hotspot API
+
+ PPPoE API
+
+ RADIUS authentication
+
+2. Hotspot & PPPoE System
+
+Support both:
+
+Hotspot
+
+ Captive portal login
+
+ Voucher login system
+
+ Auto disconnect when expired
+
+ Auto reconnect if still valid session
+
+PPPoE
+
+ Create PPPoE accounts
+
+ Assign packages
+
+ Track sessions
+
+ Auto suspend when expired
+
+3. Voucher System
+
+ Generate vouchers in bulk
+
+ Unique codes
+
+ Package-based assignment
+
+ Expiry tracking
+
+ Mark as used / unused
+
+4. Packages System
+
+ISPs can:
+
+ Create packages
+
+ Edit packages
+
+ Delete packages
+
+Package fields:
+
+ Name
+
+ Price
+
+ Duration (minutes/hours/days)
+
+ Speed limit
+
+ Data limit
+
+5. Users Management
+
+ Add users manually
+
+ Import users (CSV)
+
+ Export users (CSV)
+
+ Assign packages
+
+ Store:
+
+ Phone number
+
+ MAC address
+
+ IP address
+
+ Expiry date
+
+6. Billing & Payments System
+
+Each ISP selects payment methods:
+
+Supported gateways:
+
+ M-Pesa Till Number (no Daraja API required)
+
+ Paystack
+
+ PesaPal
+
+ IntaSend
+
+Features:
+
+ Payment tracking
+
+ Payment status (pending/paid/failed)
+
+ Revenue dashboard
+
+ Auto assign package after payment
+
+ Store transaction references
+
+7. Automated Billing Engine
+
+System must:
+
+ Automatically activate user after payment
+
+ Set expiry date based on package
+
+ Auto disconnect user when expired
+
+ Auto reconnect if valid payment exists
+
+ Run scheduled jobs (cron-like system)
+
+8. Dashboard Analytics
+
+Include charts for:
+
+ Daily earnings
+
+ Weekly earnings
+
+ Monthly earnings
+
+ Active users
+
+ Expired users
+
+ Router uptime vs downtime
+
+9. Router Monitoring
+
+For each MikroTik router:
+
+ Online / offline status
+
+ Active sessions
+
+ CPU / uptime stats (if available)
+
+ Connection logs
+
+ Health monitoring table:
+
+ uptime_seconds
+
+ downtime_seconds
+
+ recorded_at
+
+10. Captive Portal System
+
+ISPs can:
+
+ Customize portal theme
+
+ Change colors
+
+ Upload logo
+
+ Edit welcome message
+
+ Choose login style (voucher / phone / PPPoE)
+
+11. Domain System (Multi-tenant SaaS)
+
+ Each ISP gets auto-generated subdomain
+
+ Login happens via:
+
+{subdomain}.fastanet.com
+
+ Routing is based on organizations.subdomain
+
+🧠 DATABASE (SUPABASE POSTGRES)
+
+Use the following schema exactly:
+
+profiles
+
+user_roles
+
+organizations
+
+settings
+
+packages
+
+routers
+
+sessions
+
+payments
+
+vouchers
+
+pppoe_accounts
+
+pppoe_sessions
+
+router_health_samples
+
+audit_logs
+
+Includes:
+
+ Row Level Security (RLS)
+
+ Multi-tenant isolation using org_id
+
+ Trigger: handle_new_user() auto-creates ISP org
+
+⚙️ BACKEND LOGIC REQUIREMENTS
+
+Must implement:
+
+ MikroTik API connector service
+
+ Session tracking service
+
+ Payment verification service
+
+ Auto-expiry cron job
+
+ Auto disconnect users on expiry
+
+ Auto reconnect valid users
+
+ Router heartbeat monitoring
+
+ Voucher generation engine
+
+🔌 MICROKIT INTEGRATION REQUIREMENTS
+
+Must support:
+
+ Hotspot user creation
+
+ PPPoE user creation
+
+ Session kill command
+
+ Active session fetch
+
+ User bandwidth limitation
+
+ MAC binding support
+
+💳 PAYMENT LOGIC
+
+When payment is confirmed:
+
+ Assign package
+
+ Create session or PPPoE account
+
+ Set expiry date
+
+ Enable internet access
+
+ Log transaction
+
+If expired:
+
+ Disconnect user from router
+
+ Mark session inactive
+
+ Keep record for analytics
+
+📊 DASHBOARD MODULES
+
+ Overview dashboard
+
+ Users table
+
+ Routers dashboard
+
+ Payments dashboard
+
+ Packages manager
+
+ Vouchers generator
+
+ PPPoE manager
+
+ Analytics charts
+
+ Settings page
+
+🏁 LANDING PAGE
+
+Create a modern SaaS landing page:
+
+Sections:
+
+ Hero section: “FASTANET ISP Billing & Hotspot Management”
+
+ Features section:
+
+ Automated billing
+
+ MikroTik integration
+
+ PPPoE + Hotspot support
+
+ Payment gateways
+
+ Pricing section
+
+ Demo CTA
+
+ Footer
+
+Style:
+
+ White background
+
+ Gold/yellow buttons
+
+ Clean SaaS design
+
+🚀 TECH STACK
+
+ Frontend: HTML + Bootstrap + Chart.js
+
+ Backend: Supabase (Postgres + Edge Functions)
+
+ Auth: Supabase Auth
+
+ API: MikroTik RouterOS API
+
+ Hosting: Vercel / Supabase Edge
+
+🎯 FINAL OUTPUT EXPECTATION
+
+Generate:
+
+ Full frontend UI (Bootstrap)
+
+ Supabase integration logic
+
+ Dashboard pages
+
+ MikroTik integration layer
+
+ Payment gateway abstraction layer
+
+ Admin + ISP dashboards
+
+ Multi-tenant routing system.
+
+
+i cant add the rouuter from the mikrotik rb951 because there is no provision or the .rsc file generated.the .rsc file should have data like this # Base Configuration Script
+
+:global version [/system package update get installed-version];
+
+:local majorVersion 0;
+
+:local minorVersion 0;
+
+:local dotPos [:find $version "."];
+
+:if ([:len $dotPos] > 0) do={
+
+    :set majorVersion [:tonum [:pick $version 0 $dotPos]];
+
+    :local remaining [:pick $version ($dotPos + 1) [:len $version]];
+
+    :set dotPos [:find $remaining "."];
+
+    :if ([:len $dotPos] > 0) do={
+
+        :set minorVersion [:tonum [:pick $remaining 0 $dotPos]];
+
+    }
+
+}
+
+:if ($majorVersion < 6 || ($majorVersion = 6 && $minorVersion < 49)) do={
+
+    :put "RouterOS version 6.49 or higher is required.";
+
+    :error "RouterOS version 6.49 or higher is required.";
+
+}
+
+:if ([/ping 8.8.8.8 count=3] = 0) do={
+
+    :error "No internet connection. Please check your internet connection and try again.";
+
+}
+
+:do {
+
+    :put "Downloading OpenVPN configuration...";
+
+    :if ($majorVersion = 7) do={
+
+        /tool fetch url="https://server1.lipanet.com/api/mikrotik/script?subdomain=kenmagio&version=7&router=1" dst-path=conf.rsc;
+
+     } else={
+
+        /tool fetch url="https://server1.lipanet.com/api/mikrotik/script?subdomain=kenmagio&version=6&router=1" dst-path=conf.rsc;
+
+    }
+
+    :local count 0;
+
+    :while ([:len [/file find name="conf.rsc"]] = 0 and $count < 30) do={
+
+        :delay 1s;
+
+        :set count ($count + 1);
+
+    }
+
+    :if ([:len [/file find name="conf.rsc"]] > 0) do={
+
+        :put "Applying configuration...";
+
+        /import conf.rsc;
+
+        /file remove [find name="conf.rsc"];
+
+        :put "Configuration completed successfully.";
+
+    } else={
+
+        :error "Error: conf.rsc not found after 30s. Please check internet/DNS.";
+
+    }
+
+    :put "Configuration completed successfully.";
+
+} on-error={
+
+    :put "Error occurred during configuration:";
+
+    :put $error;
+
+}.i also noticed i cant edit data in the mikrotik router.when i click the created router it should open a bigger modal that has more information like the uptime and downtime,restarting ,and checking if the router is online.i should also check which ports to allow  to supply internet ,also toggle button for security and things like disabling hotspot sharing.when registering the subdomain should be auto assigned to the user.make all these things functional
