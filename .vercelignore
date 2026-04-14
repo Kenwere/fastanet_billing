@@ -1,0 +1,14 @@
+# Vercel Build Configuration
+# Only include files needed for the build
+
+.git
+.gitignore
+.github
+*.md
+.DS_Store
+.env.local
+.env.*.local
+.replit-artifact
+
+# Keep pnpm lock file
+!pnpm-lock.yaml
