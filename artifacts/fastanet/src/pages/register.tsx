@@ -4,6 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useForm } from "react-hook-form";
+import { supabase } from "@/lib/supabase";
+import { useToast } from "@/hooks/use-toast";
 
 type RegisterForm = {
   ispName: string;
@@ -15,10 +17,21 @@ type RegisterForm = {
 
 export default function RegisterPage() {
   const [, setLocation] = useLocation();
-  const { register, handleSubmit } = useForm<RegisterForm>();
+  const { register, handleSubmit, formState: { isSubmitting } } = useForm<RegisterForm>();
+  const { toast } = useToast();
 
-  const onSubmit = () => {
-    setLocation("/dashboard");
+  const onSubmit = async (data: RegisterForm) => {
+    const { error } = await supabase.auth.signUp({
+      email: data.email,
+      password: data.password,
+    });
+
+    if (error) {
+      toast({ title: "Registration failed", description: error.message, variant: "destructive" });
+    } else {
+      toast({ title: "Registration successful", description: "Please check your email to confirm your account." });
+      setLocation("/login");
+    }
   };
 
   return (
@@ -57,7 +70,7 @@ export default function RegisterPage() {
                 data-testid="input-subdomain"
               />
               <span className="flex items-center px-3 bg-muted border border-l-0 rounded-r-md text-sm text-muted-foreground">
-                .fastanet.com
+                .{import.meta.env.VITE_DOMAIN || 'fastanet.com'}
               </span>
             </div>
           </div>
@@ -97,8 +110,9 @@ export default function RegisterPage() {
             type="submit"
             className="w-full bg-primary text-primary-foreground hover:bg-primary/90"
             data-testid="button-submit-register"
+            disabled={isSubmitting}
           >
-            Create ISP Account
+            {isSubmitting ? "Creating Account..." : "Create ISP Account"}
           </Button>
         </form>
 

@@ -2,6 +2,9 @@ import { Switch, Route, Router as WouterRouter } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { useEffect, useState } from "react";
+import { supabase } from "@/lib/supabase";
+import { setAuthTokenGetter, setBaseUrl } from "@workspace/api-client-react";
 import NotFound from "@/pages/not-found";
 import LandingPage from "@/pages/landing";
 import LoginPage from "@/pages/login";
@@ -21,6 +24,48 @@ import SettingsPage from "@/pages/settings";
 const queryClient = new QueryClient();
 
 function Router() {
+  const [user, setUser] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const getSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      setUser(session?.user ?? null);
+      setLoading(false);
+    };
+
+    getSession();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  useEffect(() => {
+    setAuthTokenGetter(async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      return session?.access_token ?? null;
+    });
+    setBaseUrl(import.meta.env.VITE_API_BASE_URL);
+  }, []);
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
+  if (!user) {
+    return (
+      <Switch>
+        <Route path="/" component={LandingPage} />
+        <Route path="/login" component={LoginPage} />
+        <Route path="/register" component={RegisterPage} />
+        <Route component={LoginPage} />
+      </Switch>
+    );
+  }
+
   return (
     <Switch>
       <Route path="/" component={LandingPage} />

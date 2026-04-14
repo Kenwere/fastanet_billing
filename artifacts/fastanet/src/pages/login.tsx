@@ -4,13 +4,25 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useForm } from "react-hook-form";
+import { supabase } from "@/lib/supabase";
+import { useToast } from "@/hooks/use-toast";
 
 export default function LoginPage() {
   const [, setLocation] = useLocation();
-  const { register, handleSubmit } = useForm<{ email: string; password: string }>();
+  const { register, handleSubmit, formState: { isSubmitting } } = useForm<{ email: string; password: string }>();
+  const { toast } = useToast();
 
-  const onSubmit = () => {
-    setLocation("/dashboard");
+  const onSubmit = async (data: { email: string; password: string }) => {
+    const { error } = await supabase.auth.signInWithPassword({
+      email: data.email,
+      password: data.password,
+    });
+
+    if (error) {
+      toast({ title: "Login failed", description: error.message, variant: "destructive" });
+    } else {
+      setLocation("/dashboard");
+    }
   };
 
   return (
@@ -87,8 +99,9 @@ export default function LoginPage() {
               type="submit"
               className="w-full bg-primary text-primary-foreground hover:bg-primary/90"
               data-testid="button-submit-login"
+              disabled={isSubmitting}
             >
-              Sign In
+              {isSubmitting ? "Signing In..." : "Sign In"}
             </Button>
           </form>
 
